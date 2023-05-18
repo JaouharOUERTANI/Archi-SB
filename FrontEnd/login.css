@@ -102,7 +102,6 @@ nav li {
 li:hover {
 	color: #B1663C;
 }
-
 main {
 	width: 35%;
 	margin: 6rem auto auto auto;
@@ -111,17 +110,24 @@ main > * {
 	text-align: center;
 
 }
-main h2{
-	margin-bottom: 20px;
-}
 
 main form {
 	text-align: left;
-	margin-top:30px;
+	margin-top:20px;
 	display: flex;
 	flex-direction: column;
 }
 
+    
+          
+            
+    
+
+          
+          Expand Down
+    
+    
+  
 main input {
 	height: 50px;
 	font-size: 1.2em;
@@ -132,7 +138,6 @@ main input {
 main label {
 	margin: 2em 0 0.5em 0;
 }
-
 input[type="submit"]{
 	font-family: 'Syne';
 	font-weight: 700;
@@ -146,12 +151,10 @@ input[type="submit"]{
 	border-radius: 60px;
 	cursor: pointer;
 }
-
 #forgetPassword {
 	text-align: center;
 	text-decoration: underline;
 }
-
 footer nav ul {
 	display: flex;
 	justify-content: flex-end;
