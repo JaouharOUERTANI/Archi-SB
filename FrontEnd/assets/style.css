@@ -2,7 +2,87 @@
    v2.0 | 20110126
    License: none (public domain)
 */
-html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
   margin: 0;
   padding: 0;
   border: 0;
@@ -10,8 +90,20 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
   font: inherit;
   vertical-align: baseline;
 }
+
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
   display: block;
 }
 
@@ -19,11 +111,13 @@ body {
   line-height: 1;
 }
 
-ol,ul {
+ol,
+ul {
   list-style: none;
 }
 
-blockquote,q {
+blockquote,
+q {
   quotes: none;
 }
 
@@ -61,7 +155,6 @@ header {
 header img {
   height: 20px;
 }
-
 section {
   margin: 50px 0;
 }
@@ -106,7 +199,7 @@ h2 {
   margin-bottom: -1rem;
 }
 
-#editionBarre .edition li:hover{
+#editionBarre .edition {
   color: white;
   font-weight: 100;
   margin: 0 0.7rem 0 0.5rem;
@@ -127,10 +220,13 @@ nav ul {
   list-style-type: none;
 }
 
-nav li:hover {
-  color: #b1663c;
+nav li {
   padding: 0 10px;
   font-size: 1.2em;
+}
+
+li:hover {
+  color: #b1663c;
 }
 
 #introduction {
@@ -194,7 +290,7 @@ nav li:hover {
   margin: 3rem 0 0 0;
 }
 
-.active li:hover{
+.active {
   background-color: #1d6154 !important;
   color: #fff !important;
 }
@@ -285,4 +381,146 @@ footer nav ul {
   display: flex;
   justify-content: flex-end;
   margin: 2em;
+}
+
+/* MODAL */
+
+#modal {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#modal img {
+  height: 120px;
+}
+  
+#modal h2 {
+  font-family: "Work Sans";
+  font-weight: 100;
+  font-size: 28px;
+  color: black;
+  margin-bottom: 3rem;
+}
+
+#modal figcaption {
+  margin-bottom: 0.3rem;
+  margin-top: 0.1rem;
+}
+
+#backToModal {
+  display: none;
+  position: relative;
+  top: -1rem;
+  right: 19.2rem;
+  font-size: 19px;
+  cursor: pointer;
+}
+
+#closeModal {
+  width: 16px;
+  height: 16px;
+  position: relative;
+  top: 0rem;
+  left: 19rem;
+  cursor: pointer;
+}
+  
+#closeModal:before,
+#closeModal:after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: black;
+}
+
+#closeModal:before {
+  transform: rotate(45deg);
+}
+
+#closeModal:after {
+  transform: rotate(-45deg);
+}
+
+.modalWrapper {
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  overflow: auto;
+  width: 700px;
+  height: auto;
+  background-color: #fff;
+  padding: 3rem 0;
+}
+
+#modalGallery {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalWrapper span {
+  margin-top: 4rem;
+  margin-bottom: 2.5rem;
+  width: 480px;
+  height: 1px;
+  background-color: #b3b3b3;
+}
+
+.modalWrapper button {
+  background-color: #1d6154;
+  color: #fff;
+  border: 0;
+  padding: 0.7rem 3rem;
+  font-family: "Syne";
+  font-size: 15px;
+  border-radius: 60px;
+  cursor: pointer;
+}
+
+.modalWrapper a:hover {
+  color: #d65353;
+  font-family: "Syne";
+  margin-top: 1.5rem;
+}
+
+footer nav ul {
+  text-decoration: underline;
+}
+
+.modalWrapper p {
+  position: relative;
+  top: 20px;
+  color: #fff;
+  background-color: black;
+  width: 10px;
+  left: 75px;
+}
+
+.trashCan,
+.arrowMove {
+  position: fixed;
+  margin-top: 6px;
+  margin-left: -20px;
+  padding: 3px;
+  font-size: 10px;
+  color: white;
+  background-color: #000;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.arrowMove {
+  margin-left: -39px;
 }
