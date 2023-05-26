@@ -35,7 +35,7 @@ fetch("http://localhost:5678/api/works")
         });
     })
 
-    //s'il y a une erreur, la console va logger err
+    //s'il y a une erreur, va console logger err
     .catch((err) => {
         console.log(err);
     });
@@ -110,7 +110,7 @@ fetch("http://localhost:5678/api/categories")
         boutonTous.addEventListener("click", afficherToutesLesImages);
     })
 
-    //s'il y a une erreur, la console va logger err
+    //s'il y a une erreur, va console logger err
     .catch(function (err) {
         console.log(err);
     });
@@ -168,40 +168,41 @@ const modifierContent = () => {
     //on enlève les filtres
     document.getElementById("filtres").style.display = "none";
 
-    // mise en place de l'event pour openModal
-    document.getElementById("openModal").addEventListener("click", modalOpen);
     //appel de la fonction logout après la création du bouton de déconnexion
+    logout();
+};
 
+const logout = () => {
     //récupération du bouton "logout"
     const logoutButton = document.getElementById("logoutButton");
     //ajout d'un addEventListener au clic sur le bouton
     logoutButton.addEventListener("click", () => {
-        logout();
+        //suppression du token de sessionStorage
+        sessionStorage.removeItem("token");
+        //redirection vers la page de connexion
+        window.location.href = "/login/login.html";
     });
 };
 
-const logout = () => {
-    //suppression du token de sessionStorage
-    sessionStorage.removeItem("token");
-    //redirection vers la page de connexion
-    window.location.href = "/login/login.html";
-};
-
 //fonction pour vérifier si on est connecté
-//const loggedIn = () => {
-//on récupère le token
-const token = sessionStorage.getItem("token");
-//si la valeur de token est null, on renvoie 0
-console.log(token);
-if (token !== null) {
-    modifierContent();
-}
-//};
-//loggedIn();
+const loggedIn = () => {
+    //on récupère le token
+    const token = sessionStorage.getItem("token");
+    //si la valeur de token est null, on renvoie 0
+    if (!token) {
+        return 0;
+        //sinon, on fait la fonction modifierContent
+    } else if (token) {
+        modifierContent();
+    }
+};
+loggedIn();
+
+document.getElementById("openModal").addEventListener("click", modalOpen);
 
 function modalOpen() {
-    //if (loggedIn) {
-    const modal = `
+    if (loggedIn) {
+        const modal = `
             <aside id="modal">
                 <div class="modalWrapper">
                     <i class="fa-solid fa-arrow-left" id="backToModal"></i>
@@ -237,110 +238,115 @@ function modalOpen() {
                 </div>
             </aside>
         `;
-    document.body.insertAdjacentHTML("afterbegin", modal);
+        document.body.insertAdjacentHTML("afterbegin", modal);
 
-    const photoPreview = document.getElementById("buttonAddPhoto");
-    photoPreview.addEventListener("change", (event) => {
-        const file = event.target.files[0];
-        if (file.size < 4 * 1024 * 1024) {
-            //vérifie la taille de l'image
-            const photoPreviewBox = document.getElementById("photoShowPreview");
-            const fileUrl = URL.createObjectURL(file);
-            photoPreviewBox.src = fileUrl;
+        const photoPreview = document.getElementById("buttonAddPhoto");
+        photoPreview.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file.size < 4 * 1024 * 1024) {
+                //vérifie la taille de l'image
+                const photoPreviewBox =
+                    document.getElementById("photoShowPreview");
+                const fileUrl = URL.createObjectURL(file);
+                photoPreviewBox.src = fileUrl;
 
-            const sendPhotoContentElements =
-                document.querySelectorAll(".sendPhotoContent");
-            for (const element of sendPhotoContentElements) {
-                element.style.display = "none";
-                photoPreviewBox.style.display = "block";
+                const sendPhotoContentElements =
+                    document.querySelectorAll(".sendPhotoContent");
+                for (const element of sendPhotoContentElements) {
+                    element.style.display = "none";
+                    photoPreviewBox.style.display = "block";
+                }
+            } else {
+                alert("image trop volumineuse");
             }
-        } else {
-            alert("image trop volumineuse");
-        }
-    });
-    //verifie les changements dans le form
-    document
-        .getElementById("addPhotoForm")
-        .addEventListener("change", verifyData);
-
-    //si le bouton est en couleur (valide), la fonction createNewWork est appellée quand cliqué
-    document.getElementById("valider").addEventListener("click", () => {
-        if (verifyData) {
-            createNewWork();
-        }
-    });
-
-    document.getElementById("closeModal").addEventListener("click", closeModal);
-    document
-        .getElementById("addPhoto")
-        .addEventListener("click", ajoutPhotoMode);
-    document.getElementById("modal").addEventListener("click", (event) => {
-        if (event.target === document.getElementById("modal")) {
-            closeModal();
-        }
-    });
-
-    //fonction qui crée un élément "figure" dans la gallerie de la modale
-    const createFigureModal = (element) => {
-        const modalGallery = document.getElementById("modalGallery");
-
-        const figure = document.createElement("figure");
-        figure.setAttribute("data-id", element.id);
-        figure.setAttribute("data-tag", element.category.name);
-        figure.setAttribute("class", "figureModalGallery");
-
-        const img = document.createElement("img");
-        img.setAttribute("class", "imgModalGallery");
-        img.setAttribute("crossorigin", "anonymous");
-        img.setAttribute("src", element.imageUrl);
-        img.setAttribute("alt", element.title);
-
-        const arrowIcon = document.createElement("i");
-        arrowIcon.setAttribute(
-            "class",
-            "fa-solid fa-arrows-up-down-left-right arrowMove"
-        );
-
-        const trashIcon = document.createElement("i");
-        trashIcon.setAttribute("class", "fa-solid fa-trash-can trashCan");
-        trashIcon.setAttribute("data-id", element.id);
-
-        const h4 = document.createElement("h4");
-        h4.innerText = "éditer";
-
-        figure.appendChild(img);
-        figure.appendChild(arrowIcon);
-        figure.appendChild(trashIcon);
-        figure.appendChild(h4);
-
-        modalGallery.appendChild(figure);
-    };
-
-    fetch("http://localhost:5678/api/works")
-        //si fetch fonctionne on récupère les données au format JSON
-        .then((res) => {
-            if (res.ok) {
-                return res.json();
-            }
-        })
-
-        //récupération de chaque élément et effectue la fonction "createFigureModal" pour chaque élément récupéré
-        .then((products) => {
-            products.forEach((product) => {
-                createFigureModal(product);
-            });
-            //ajoute un addEventListener sur toutes les icones corbeille
-            const trashButtons = document.querySelectorAll(".trashCan");
-            trashButtons.forEach((button) => {
-                button.addEventListener("click", (e) => deleteWork(e.target));
-            });
-        })
-
-        //s'il y a une erreur, la console va logger err
-        .catch((err) => {
-            console.log(err);
         });
-    //}
+        //verifie les changement dans le form
+        document
+            .getElementById("addPhotoForm")
+            .addEventListener("change", verifyData);
+
+        //si le bouton est en couleur (valide), la fonction createNewWork est appellée quand cliqué
+        document.getElementById("valider").addEventListener("click", () => {
+            if (verifyData) {
+                createNewWork();
+            }
+        });
+
+        document
+            .getElementById("closeModal")
+            .addEventListener("click", closeModal);
+        document
+            .getElementById("addPhoto")
+            .addEventListener("click", ajoutPhotoMode);
+        document.getElementById("modal").addEventListener("click", (event) => {
+            if (event.target === document.getElementById("modal")) {
+                closeModal();
+            }
+        });
+
+        //fonction qui crée un élément "figure" dans la gallerie de la modale
+        const createFigureModal = (element) => {
+            const modalGallery = document.getElementById("modalGallery");
+
+            const figure = document.createElement("figure");
+            figure.setAttribute("data-id", element.id);
+            figure.setAttribute("data-tag", element.category.name);
+            figure.setAttribute("class", "figureModalGallery");
+
+            const img = document.createElement("img");
+            img.setAttribute("class", "imgModalGallery");
+            img.setAttribute("crossorigin", "anonymous");
+            img.setAttribute("src", element.imageUrl);
+            img.setAttribute("alt", element.title);
+
+            const arrowIcon = document.createElement("i");
+            arrowIcon.setAttribute(
+                "class",
+                "fa-solid fa-arrows-up-down-left-right arrowMove"
+            );
+
+            const trashIcon = document.createElement("i");
+            trashIcon.setAttribute("class", "fa-solid fa-trash-can trashCan");
+            trashIcon.setAttribute("data-id", element.id);
+
+            const h4 = document.createElement("h4");
+            h4.innerText = "éditer";
+
+            figure.appendChild(img);
+            figure.appendChild(arrowIcon);
+            figure.appendChild(trashIcon);
+            figure.appendChild(h4);
+
+            modalGallery.appendChild(figure);
+        };
+
+        fetch("http://localhost:5678/api/works")
+            //si fetch fonctionne on récupère les données au format JSON
+            .then((res) => {
+                if (res.ok) {
+                    return res.json();
+                }
+            })
+
+            //récupération de chaque élément et effectue la fonction "createFigureModal" pour chaque élément récupéré
+            .then((products) => {
+                products.forEach((product) => {
+                    createFigureModal(product);
+                });
+                //ajoute un addEventListener sur tous les icones corbeille
+                const trashButtons = document.querySelectorAll(".trashCan");
+                trashButtons.forEach((button) => {
+                    button.addEventListener("click", (e) =>
+                        deleteWork(e.target)
+                    );
+                });
+            })
+
+            //s'il y a une erreur, va console logger err
+            .catch((err) => {
+                console.log(err);
+            });
+    }
 }
 
 const closeModal = () => {
@@ -440,7 +446,7 @@ function createNewWork() {
     data.append("category", newCategory.value);
 
     fetch(
-        "http://localhost:5678/api/works", //envoie une requête à l'api pour créer une nouvelle image
+        "http://localhost:5678/api/works", //envoie une requête à l'api pour crée une nouvelle image
         {
             method: "POST",
             accept: "application/json",
