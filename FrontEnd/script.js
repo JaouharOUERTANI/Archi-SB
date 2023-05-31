@@ -35,7 +35,7 @@ fetch("http://localhost:5678/api/works")
         });
     })
 
-    //s'il y a une erreur, va console logger err
+    //s'il y a une erreur, la console va logger err
     .catch((err) => {
         console.log(err);
     });
@@ -72,7 +72,7 @@ fetch("http://localhost:5678/api/categories")
         //pour chaque bouton, si on clique dessus, fais une fonction
         buttons.forEach((button) => {
             button.addEventListener("click", function () {
-                //on enlève le classe "active" à tout les boutons
+                //on enlève le classe "active" à tous les boutons
                 buttons.forEach((element) =>
                     element.classList.remove("active")
                 );
@@ -110,7 +110,7 @@ fetch("http://localhost:5678/api/categories")
         boutonTous.addEventListener("click", afficherToutesLesImages);
     })
 
-    //s'il y a une erreur, va console logger err
+    //s'il y a une erreur, la console va logger err
     .catch(function (err) {
         console.log(err);
     });
@@ -198,6 +198,8 @@ const loggedIn = () => {
 };
 loggedIn();
 
+//FENETRE MODALE
+
 document.getElementById("openModal").addEventListener("click", modalOpen);
 
 function modalOpen() {
@@ -260,7 +262,7 @@ function modalOpen() {
                 alert("image trop volumineuse");
             }
         });
-        //verifie les changement dans le form
+        //verifie les changements dans le form
         document
             .getElementById("addPhotoForm")
             .addEventListener("change", verifyData);
@@ -342,7 +344,7 @@ function modalOpen() {
                 });
             })
 
-            //s'il y a une erreur, va console logger err
+            //s'il y a une erreur, la console va logger err
             .catch((err) => {
                 console.log(err);
             });
@@ -408,6 +410,8 @@ function backToModal() {
     document.getElementById("deleteGallery").style.display = "block";
     document.getElementById("backToModal").style.display = "none";
 }
+
+// FIN FENETRE MODALE
 
 //fonction qui va vérifier si les datas rentrées dans le formulaire sont correctes
 function verifyData() {
