@@ -47,7 +47,7 @@ const createButton = (button) => {
     //on ajoute le bouton
     filtres.insertAdjacentHTML(
         "beforeend",
-        `<button data-tag="${button.name}"> ${button.name} </button>`
+        `<button data-tag="${button.title}"> ${button.title} </button>`
     );
 };
 
@@ -263,24 +263,23 @@ function modalOpen() {
         .getElementById("addPhotoForm")
         .addEventListener("change", verifyData);
 
-    //si le bouton est en couleur (valide), la fonction createNewWork est appellée quand cliqué
+    // si le bouton est en couleur (valide), la fonction createNewWork est appelée quand cliqué
     document.getElementById("valider").addEventListener("click", () => {
-        if (verifyData) {
+        if (verifyData()) { // Appel de la fonction verifyData
             createNewWork();
         }
     });
 
     document.getElementById("closeModal").addEventListener("click", closeModal);
-    document
-        .getElementById("addPhoto")
-        .addEventListener("click", ajoutPhotoMode);
+    document.getElementById("addPhoto").addEventListener("click", ajoutPhotoMode);
     document.getElementById("modal").addEventListener("click", (event) => {
         if (event.target === document.getElementById("modal")) {
             closeModal();
-        }
+        } 
+   
     });
 
-    //fonction qui crée un élément "figure" dans la gallerie de la modale
+    // fonction qui crée un élément "figure" dans la galerie de la modale
     const createFigureModal = (element) => {
         const modalGallery = document.getElementById("modalGallery");
 
@@ -304,7 +303,21 @@ function modalOpen() {
         const trashIcon = document.createElement("i");
         trashIcon.setAttribute("class", "fa-solid fa-trash-can trashCan");
         trashIcon.setAttribute("data-id", element.id);
-
+        trashIcon.addEventListener("click", (event) => {
+          event.preventDefault(); // Empêche le comportement par défaut de l'événement de clic
+          event.stopPropagation(); // Arrête la propagation de l'événement pour éviter que la modale ne se ferme
+        
+          const confirmDelete = confirm("Voulez-vous vraiment supprimer ce travail ?");
+          if (confirmDelete) {
+            deleteWork(event.target);
+          }
+          document.querySelectorAll("#modal *").forEach((element) => {
+            element.addEventListener("click", (event) => {
+                event.stopPropagation();
+            });
+        });
+        });
+        
         const h4 = document.createElement("h4");
         h4.innerText = "éditer";
 
@@ -317,174 +330,194 @@ function modalOpen() {
     };
 
     fetch("http://localhost:5678/api/works")
-        //si fetch fonctionne on récupère les données au format JSON
+        // si fetch fonctionne, on récupère les données au format JSON
         .then((res) => {
             if (res.ok) {
                 return res.json();
             }
+            throw new Error('Error during fetch');
         })
-
-        //récupération de chaque élément et effectue la fonction "createFigureModal" pour chaque élément récupéré
+        // récupération de chaque élément et effectue la fonction "createFigureModal" pour chaque élément récupéré
         .then((products) => {
             products.forEach((product) => {
                 createFigureModal(product);
             });
-            //ajoute un addEventListener sur tous les icones corbeille
-            const trashButtons = document.querySelectorAll(".trashCan");
-            trashButtons.forEach((button) => {
-                button.addEventListener("click", (e) => deleteWork(e.target));
+
+            // Ajoute un addEventListener sur tous les icônes corbeille
+            const trashIcon = document.querySelectorAll(".trashIcon");
+            trashIcon.forEach((button) => {
+                button.addEventListener("click", (e) => {
+                    e.preventDefault(); // Empêche le comportement par défaut du clic
+                    deleteWork(e.target); // Appelle la fonction deleteWork avec l'élément cible
+                    document.querySelectorAll("#modal *").forEach((element) => {
+                        element.addEventListener("click", (event) => {
+                            event.stopPropagation();
+                        });
+                    });
+                });
             });
         })
-
-        //s'il y a une erreur, la console va logger err
+        // s'il y a une erreur, la console va logger err
         .catch((err) => {
             console.log(err);
-        });
-    //}
+             });
 }
 
-const closeModal = () => {
-    document.getElementById("modal").remove();
-};
-
-const deleteWork = (element) => {
-    const workId = element.dataset.id;
-    fetch(`http://localhost:5678/api/works/${workId}`, {
-        method: "DELETE",
-        headers: {
-            Authorization: `Bearer ${sessionStorage["token"]}`,
-        },
-    })
-        .then((res) => {
-            if (res.ok) {
-                console.log("L'image à bien été supprimée");
-                element.parentNode.remove();
-                Array.from(gallery.querySelectorAll("figure")).forEach(
-                    (figure) => {
-                        if (figure.getAttribute("data-id") === workId) {
-                            figure.remove();
-                        }
-                    }
-                );
-            } else {
-                //si la suppression a échoué, affiche un message d'erreur
-                console.error("Une erreur est survenue lors de la suppression");
-            }
-        })
-        .catch((err) => {
-            console.error(err);
-        });
-};
-
-function ajoutPhotoMode() {
-    changeModalContent();
-}
-
-function changeModalContent() {
-    document.getElementById("addPhotoForm").style.display = "flex";
-    document.getElementById("modalGallery").style.display = "none";
-    document.getElementById("addPhoto").style.display = "none";
-    document.getElementById("valider").style.display = "block";
-    document.getElementById("galleryTitle").innerHTML = "Ajout photo";
-    document.getElementById("deleteGallery").style.display = "none";
-    document.getElementById("backToModal").style.display = "block";
-    document
-        .getElementById("backToModal")
-        .addEventListener("click", backToModal);
-}
-
-function backToModal() {
-    document.getElementById("addPhotoForm").style.display = "none";
-    document.getElementById("modalGallery").style.display = "grid";
-    document.getElementById("addPhoto").style.display = "block";
-    document.getElementById("valider").style.display = "none";
-    document.getElementById("galleryTitle").innerHTML = "Galerie photo";
-    document.getElementById("deleteGallery").style.display = "block";
-    document.getElementById("backToModal").style.display = "none";
-}
-
-//fonction qui va vérifier si les datas rentrées dans le formulaire sont correctes
-function verifyData() {
-    const buttonCheck = document.getElementById("valider");
-    const newPhoto = document.getElementById("buttonAddPhoto");
-    const newTitle = document.getElementById("sendPhotoTitle");
-    const selectElement = document.getElementById("sendPhotoCategory");
-    //si les 3 champs à remplir sont completés on met le background en couleur
-    if (
-        newPhoto.value !== "" &&
-        newTitle.value !== "" &&
-        selectElement.value !== "0"
-    ) {
-        let error = document.querySelector("p#error");
-        if (error) {
-            error.remove();
-        }
-        buttonCheck.style.backgroundColor = "#1D6154";
-        return true;
-        //sinon on le laisse en gris
-    } else {
-        buttonCheck.style.backgroundColor = "#A7A7A7";
-        return false;
-    }
-}
-
-function createNewWork() {
-    //crée la nouvelle image
-    const data = new FormData();
-    const buttonCheck = document.getElementById("valider");
-    const newPhoto = document.getElementById("buttonAddPhoto");
-    const newTitle = document.getElementById("sendPhotoTitle");
-    const newCategory = document.getElementById("sendPhotoCategory");
-    data.append("image", newPhoto.files[0]);
-    data.append("title", newTitle.value);
-    data.append("category", newCategory.value);
-
-    fetch(
-        "http://localhost:5678/api/works", //envoie une requête à l'api pour crée une nouvelle image
-        {
-            method: "POST",
-            accept: "application/json",
+    const deleteWork = (element) => {
+        const workId = element.dataset.id;
+        fetch(`http://localhost:5678/api/works/${workId}`, {
+            method: "DELETE",
             headers: {
                 Authorization: `Bearer ${sessionStorage["token"]}`,
             },
-            body: data,
-        }
-    )
-        .then((res) => {
-            if (res.ok) {
-                addDynamicWork();
-                alert("Projet ajouté !");
-            } else {
-                let error = document.querySelector("p#error");
-                if (error) {
-                    error.parentNode.removeChild(error);
+        })
+            .then((res) => {
+                if (res.ok) {
+                    console.log("L'image a bien été supprimée");
+                    // Supprime l'élément du DOM uniquement si la suppression réussit
+                    element.parentNode.remove();
+                } else {
+                    // Si la suppression a échoué, affiche un message d'erreur
+                    console.error("Une erreur est survenue lors de la suppression");
                 }
-                buttonCheck.insertAdjacentHTML(
-                    "beforebegin",
-                    `<p id="error">*Veuillez remplir tous les champs</p>`
-                );
-            }
-        })
-        .then((data) => {
-            console.log(data);
-        })
+                document.querySelectorAll("#modal *").forEach((element) => {
+                    element.addEventListener("click", (event) => {
+                        event.stopPropagation();
+                    });
+                });
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    };
 
-        .catch((error) => {
-            console.log(error);
-        });
-}
-
-function addDynamicWork() {
-    //ajoute dynamiquement le Work en utilisant l'ancienne fonction
-    fetch("http://localhost:5678/api/works")
-        .then((res) => {
-            if (res.ok) {
-                return res.json();
+    // Écouteur d'événement pour les icônes de corbeille
+    document.querySelectorAll(".trashIcon").forEach((icon) => {
+        icon.addEventListener("click", (event) => {
+            event.preventDefault(); // Empêche le comportement par défaut du clic sur l'icône de corbeille
+            event.stopPropagation();
+            const confirmDelete = confirm("Voulez-vous vraiment supprimer ce travail ?");
+            if (confirmDelete) {
+                deleteWork(icon);
             }
-        })
-        .then((products) => {
-            createFigureGallery(products[products.length - 1]);
-            console.log("L'image a bien été ajoutée");
-            //location.reload();
+            document.querySelectorAll("#modal *").forEach((element) => {
+                element.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                });
+            });
         });
-}
+    });
+
+
+    function ajoutPhotoMode() {
+        changeModalContent();
+    }
+
+    function changeModalContent() {
+        document.getElementById("addPhotoForm").style.display = "flex";
+        document.getElementById("modalGallery").style.display = "none";
+        document.getElementById("addPhoto").style.display = "none";
+        document.getElementById("valider").style.display = "block";
+        document.getElementById("galleryTitle").innerHTML = "Ajout photo";
+        document.getElementById("deleteGallery").style.display = "none";
+        document.getElementById("backToModal").style.display = "block";
+        document
+            .getElementById("backToModal")
+            .addEventListener("click", backToModal);
+    }
+
+    function backToModal() {
+        document.getElementById("addPhotoForm").style.display = "none";
+        document.getElementById("modalGallery").style.display = "grid";
+        document.getElementById("addPhoto").style.display = "block";
+        document.getElementById("valider").style.display = "none";
+        document.getElementById("galleryTitle").innerHTML = "Galerie photo";
+        document.getElementById("deleteGallery").style.display = "block";
+        document.getElementById("backToModal").style.display = "none";
+    }
+
+    //fonction qui va vérifier si les datas rentrées dans le formulaire sont correctes
+    function verifyData() {
+        const buttonCheck = document.getElementById("valider");
+        const newPhoto = document.getElementById("buttonAddPhoto");
+        const newTitle = document.getElementById("sendPhotoTitle");
+        const selectElement = document.getElementById("sendPhotoCategory");
+        //si les 3 champs à remplir sont completés on met le background en couleur
+        if (
+            newPhoto.value !== "" &&
+            newTitle.value !== "" &&
+            selectElement.value !== "0"
+        ) {
+            let error = document.querySelector("p#error");
+            if (error) {
+                error.remove();
+            }
+            buttonCheck.style.backgroundColor = "#1D6154";
+            return true;
+            //sinon on le laisse en gris
+        } else {
+            buttonCheck.style.backgroundColor = "#A7A7A7";
+            return false;
+        }
+    }
+
+    function createNewWork() {
+        //crée la nouvelle image
+        const data = new FormData();
+        const buttonCheck = document.getElementById("valider");
+        const newPhoto = document.getElementById("buttonAddPhoto");
+        const newTitle = document.getElementById("sendPhotoTitle");
+        const newCategory = document.getElementById("sendPhotoCategory");
+        data.append("image", newPhoto.files[0]);
+        data.append("title", newTitle.value);
+        data.append("category", newCategory.value);
+
+        fetch(
+            "http://localhost:5678/api/works", //envoie une requête à l'api pour crée une nouvelle image
+            {
+                method: "POST",
+                accept: "application/json",
+                headers: {
+                    Authorization: `Bearer ${sessionStorage["token"]}`,
+                },
+                body: data,
+            }
+        )
+            .then((res) => {
+                if (res.ok) {
+                    addDynamicWork();
+                    alert("Projet ajouté !");
+                } else {
+                    let error = document.querySelector("p#error");
+                    if (error) {
+                        error.parentNode.removeChild(error);
+                    }
+                    buttonCheck.insertAdjacentHTML(
+                        "beforebegin",
+                        `<p id="error">*Veuillez remplir tous les champs</p>`
+                    );
+                }
+            })
+            .then((data) => {
+                console.log(data);
+            })
+
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    function addDynamicWork() {
+        //ajoute dynamiquement le Work en utilisant l'ancienne fonction
+        fetch("http://localhost:5678/api/works")
+            .then((res) => {
+                if (res.ok) {
+                    return res.json();
+                }
+            })
+            .then((products) => {
+                createFigureGallery(products[products.length - 1]);
+                console.log("L'image a bien été ajoutée");
+                //location.reload();
+            });
+        }
